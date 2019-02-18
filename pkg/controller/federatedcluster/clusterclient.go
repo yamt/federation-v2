@@ -17,10 +17,10 @@ limitations under the License.
 package federatedcluster
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/golang/glog"
-	"github.com/pkg/errors"
 
 	fedcommon "github.com/kubernetes-sigs/federation-v2/pkg/apis/core/common"
 	fedv1a1 "github.com/kubernetes-sigs/federation-v2/pkg/apis/core/v1alpha1"
@@ -39,6 +39,18 @@ const (
 	LabelZoneFailureDomain = "failure-domain.beta.kubernetes.io/zone"
 	LabelZoneRegion        = "failure-domain.beta.kubernetes.io/region"
 )
+
+type noZoneInfoError struct {
+	msg string
+}
+
+func newNoZoneInfoError(msg string) error {
+	return &noZoneInfoError{msg}
+}
+
+func (err *noZoneInfoError) Error() string {
+	return err.msg
+}
 
 // ClusterClient provides methods for determining the status and zones of a
 // particular FederatedCluster.
@@ -147,8 +159,8 @@ func getZoneNameForNode(node corev1.Node) (string, error) {
 			return value, nil
 		}
 	}
-	return "", errors.Errorf("Zone name for node %s not found. No label with key %s",
-		node.Name, LabelZoneFailureDomain)
+	return "", newNoZoneInfoError(fmt.Sprintf("Zone name for node %s not found. No label with key %s",
+		node.Name, LabelZoneFailureDomain))
 }
 
 // Find the name of the region in which a Node is running.
@@ -158,6 +170,6 @@ func getRegionNameForNode(node corev1.Node) (string, error) {
 			return value, nil
 		}
 	}
-	return "", errors.Errorf("Region name for node %s not found. No label with key %s",
-		node.Name, LabelZoneRegion)
+	return "", newNoZoneInfoError(fmt.Sprintf("Region name for node %s not found. No label with key %s",
+		node.Name, LabelZoneRegion))
 }
