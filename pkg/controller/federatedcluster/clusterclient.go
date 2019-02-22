@@ -52,10 +52,19 @@ func (err *noZoneInfoError) Error() string {
 	return err.msg
 }
 
+func IsNoZoneInfoError(err error) bool {
+	_, ok := err.(*noZoneInfoError)
+	return ok
+}
+
 // ClusterClient provides methods for determining the status and zones of a
 // particular FederatedCluster.
 type ClusterClient struct {
 	kubeClient *kubeclientset.Clientset
+
+	// If the caller warned noZoneInfoError to users.
+	// REVISIT: This logically belongs to the caller.
+	zoneWarned bool
 }
 
 // NewClusterClientSet returns a ClusterClient for the given FederatedCluster.

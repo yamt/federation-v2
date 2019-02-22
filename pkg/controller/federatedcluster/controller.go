@@ -221,7 +221,17 @@ func (cc *ClusterController) updateClusterStatus() error {
 
 		zone, region, err := clusterClient.GetClusterZones()
 		if err != nil {
-			glog.Warningf("Failed to get zones and region for cluster %s: %v", cluster.Name, err)
+			isNoZoneInfo := IsNoZoneInfoError(err)
+			switch {
+			case isNoZoneInfo && clusterClient.zoneWarned:
+				// This is normal for non-cloudprovider deployments.
+				// Avoid flooding the log on every iterations.
+			case isNoZoneInfo:
+				clusterClient.zoneWarned = true
+				fallthrough
+			default:
+				glog.Warningf("Failed to get zones and region for cluster %s: %v", cluster.Name, err)
+			}
 		} else {
 			if len(zone) == 0 {
 				zone = cluster.Status.Zone
