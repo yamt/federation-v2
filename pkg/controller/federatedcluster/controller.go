@@ -63,7 +63,7 @@ type ClusterController struct {
 
 	// clusterKubeClientMap is a mapping of clusterName and the ClusterClient
 	// for that cluster.
-	clusterKubeClientMap map[string]ClusterClient
+	clusterKubeClientMap map[string]*ClusterClient
 
 	// clusterController is the cache.Controller where callbacks are registered
 	// for events on FederatedClusters.
@@ -94,7 +94,7 @@ func newClusterController(fedClient fedclientset.Interface, kubeClient kubeclien
 		crClient:             crClient,
 		clusterMonitorPeriod: clusterMonitorPeriod,
 		clusterStatusMap:     make(map[string]fedv1a1.FederatedClusterStatus),
-		clusterKubeClientMap: make(map[string]ClusterClient),
+		clusterKubeClientMap: make(map[string]*ClusterClient),
 		fedNamespace:         namespaces.FederationNamespace,
 		clusterNamespace:     namespaces.ClusterNamespace,
 	}
@@ -158,7 +158,7 @@ func (cc *ClusterController) addToClusterSetWithoutLock(cluster *fedv1a1.Federat
 		glog.Errorf("Failed to create corresponding restclient of kubernetes cluster: %v", err)
 		return
 	}
-	cc.clusterKubeClientMap[cluster.Name] = *restClient
+	cc.clusterKubeClientMap[cluster.Name] = restClient
 }
 
 // Run begins watching and syncing.
