@@ -40,6 +40,7 @@ func NewQualifiedName(obj pkgruntime.Object) QualifiedName {
 	if err != nil {
 		// TODO(marun) This should never happen, but if it does, the
 		// resulting empty name.
+		panic("hey")
 		return QualifiedName{}
 	}
 	return QualifiedName{
