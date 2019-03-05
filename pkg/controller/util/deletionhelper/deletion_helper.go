@@ -181,6 +181,8 @@ func (dh *DeletionHelper) HandleObjectInUnderlyingClusters(obj runtime.Object, s
 		return nil, errors.Errorf("waiting for clusters %s to become ready to verify that obj %s has been deleted", strings.Join(clusterNames, ", "), objName)
 	}
 
+	glog.V(3).Infof("Now obj %s doesn't have objects in underlying clusters", objName)
+
 	// All done. Just remove the finalizer.
 	return dh.removeFinalizers(obj, sets.NewString(FinalizerDeleteFromUnderlyingClusters))
 }
